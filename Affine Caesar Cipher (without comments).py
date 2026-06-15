@@ -1,12 +1,22 @@
 import math
 
 def mod_inverse(a, m):
-    for i in range(m):
-        if (a * i) % m == 1:
-            return i
-    return None
+    """Find modular multiplicative inverse using Extended Euclidean Algorithm"""
+    def extended_gcd(a, b):
+        if a == 0:
+            return b, 0, 1
+        gcd, x1, y1 = extended_gcd(b % a, a)
+        x = y1 - (b // a) * x1
+        y = x1
+        return gcd, x, y
+    
+    gcd, x, _ = extended_gcd(a % m, m)
+    if gcd != 1:
+        return None
+    return (x % m + m) % m
 
 def affine_encrypt(plaintext, a, b):
+    """Encrypt plaintext using affine cipher: C = (a*P + b) mod 26"""
     result = ""
     for char in plaintext.upper():
         if char.isalpha():
@@ -16,6 +26,7 @@ def affine_encrypt(plaintext, a, b):
     return result
 
 def affine_decrypt(ciphertext, a, b):
+    """Decrypt ciphertext using affine cipher: P = a^-1 * (C - b) mod 26"""
     result = ""
     a_inv = mod_inverse(a, 26)
     if a_inv is None:
@@ -27,13 +38,18 @@ def affine_decrypt(ciphertext, a, b):
             result += char
     return result
 
-a = int(input("Enter value of a: "))
-b = int(input("Enter value of b: "))
-plaintext = input("Enter plaintext: ")
-
-if math.gcd(a, 26) != 1:
-    print("Invalid key: 'a' must be coprime with 26.")
-else:
-    cipher = affine_encrypt(plaintext, a, b)
-    print("Ciphertext:", cipher)
-    print("Decrypted:", affine_decrypt(cipher, a, b))
+# Main program
+try:
+    a = int(input("Enter value of a: "))
+    b = int(input("Enter value of b: "))
+    plaintext = input("Enter plaintext: ")
+    
+    if math.gcd(a, 26) != 1:
+        print("Invalid key: 'a' must be coprime with 26.")
+    else:
+        cipher = affine_encrypt(plaintext, a, b)
+        print("Ciphertext:", cipher)
+        decrypted = affine_decrypt(cipher, a, b)
+        print("Decrypted:", decrypted)
+except ValueError:
+    print("Error: 'a' and 'b' must be integers.")
